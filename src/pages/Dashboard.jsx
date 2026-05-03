@@ -56,7 +56,7 @@ export default function Dashboard() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
           {[
             { label: "Total", count: prestations.length },
-            { label: "À venir", count: prestations.filter(p => STATUTS_A_VENIR.includes(p.statut)).length },
+            { label: "À venir", count: prestations.filter(p => [...STATUTS_A_VENIR, "Acompte payé"].includes(p.statut)).length },
             { label: "En cours", count: prestations.filter(p => p.statut === "En cours").length },
             { label: "Terminées", count: prestations.filter(p => p.statut === "Évènement terminé").length },
           ].map(s => (
