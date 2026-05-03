@@ -31,10 +31,12 @@ export default function Finance() {
   const prestationsAnnee = prestations.filter(p => p.date && new Date(p.date).getFullYear() === annee);
 
   // Stats résumé
+  const caTotalToutesAnnees = prestations.reduce((acc, p) => acc + montantNum(p), 0);
+  const caEncaisseToutesAnnees = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
   const caTotal = prestationsAnnee.reduce((acc, p) => acc + montantNum(p), 0);
   const caEncaisse = prestationsAnnee.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
   const totalCharges = charges.reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
-  const beneficeNet = caEncaisse - totalCharges;
+  const beneficeNet = caEncaisseToutesAnnees - totalCharges;
 
   // CA par mois
   const caParMois = MOIS_LABELS.map((label, i) => {
@@ -78,8 +80,23 @@ export default function Finance() {
       ) : (
         <div style={{ padding: "32px", maxWidth: 1100, margin: "0 auto" }}>
 
+          {/* Résumé global toutes années */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 24 }}>
+            {[
+              { label: "CA Total (toutes années)", value: caTotalToutesAnnees, color: "#C9A84C" },
+              { label: "CA Encaissé (toutes années)", value: caEncaisseToutesAnnees, color: "#4CAF50" },
+              { label: "Total Charges", value: totalCharges, color: "#f44336" },
+              { label: "Bénéfice Net Global", value: beneficeNet, color: beneficeNet >= 0 ? "#4CAF50" : "#f44336" },
+            ].map(item => (
+              <div key={item.label} style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px" }}>
+                <div style={{ color: item.color, fontSize: 28, fontWeight: 700 }}>{item.value.toLocaleString("fr-FR")} €</div>
+                <div style={{ color: "#666", fontSize: 13, marginTop: 4 }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+
           {/* Filtre année */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 32, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 24, alignItems: "center" }}>
             <span style={{ color: "#666", fontSize: 13 }}>Année :</span>
             {anneesDispos.map(a => (
               <button key={a} onClick={() => setAnnee(a)} style={{
@@ -91,17 +108,15 @@ export default function Finance() {
             ))}
           </div>
 
-          {/* Résumé */}
+          {/* Résumé année sélectionnée */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
             {[
-              { label: "CA Total", value: caTotal, color: "#C9A84C" },
-              { label: "CA Encaissé", value: caEncaisse, color: "#4CAF50" },
-              { label: "Total Charges", value: totalCharges, color: "#f44336" },
-              { label: "Bénéfice Net", value: beneficeNet, color: beneficeNet >= 0 ? "#4CAF50" : "#f44336" },
+              { label: `CA Total ${annee}`, value: caTotal, color: "#C9A84C" },
+              { label: `CA Encaissé ${annee}`, value: caEncaisse, color: "#4CAF50" },
             ].map(item => (
-              <div key={item.label} style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px" }}>
-                <div style={{ color: item.color, fontSize: 28, fontWeight: 700 }}>{item.value.toLocaleString("fr-FR")} €</div>
-                <div style={{ color: "#666", fontSize: 13, marginTop: 4 }}>{item.label}</div>
+              <div key={item.label} style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 12, padding: "16px 24px" }}>
+                <div style={{ color: item.color, fontSize: 22, fontWeight: 700 }}>{item.value.toLocaleString("fr-FR")} €</div>
+                <div style={{ color: "#555", fontSize: 12, marginTop: 4 }}>{item.label}</div>
               </div>
             ))}
           </div>
