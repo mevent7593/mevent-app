@@ -42,6 +42,7 @@ export default function PrestationCard({ prestation }) {
         {prestation.lieu && <span>📍 {prestation.lieu}</span>}
         {prestation.montant > 0 && <span>💶 {prestation.montant}€</span>}
         {prestation.bosseurs?.length > 0 && <span>👥 {prestation.bosseurs.join(", ")}</span>}
+        {prestation.extras?.length > 0 && <span>➕ {prestation.extras.join(", ")}</span>}
       </div>
     </div>
   );
