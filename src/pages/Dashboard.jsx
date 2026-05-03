@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrestationCard from "../components/PrestationCard";
 
-const FILTRES = ["Tous", "À venir", "Confirmé", "En cours", "Évènement terminé", "En attente de l'acompte"];
+const FILTRES = ["Tous", "À venir", "Confirmé", "Acompte payé", "En cours", "Évènement terminé", "En attente de l'acompte"];
 const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°"];
 
@@ -25,7 +25,7 @@ export default function Dashboard() {
   const acompteNum = (p) => Number(p.acompte) || 0;
   const caTotal = prestations.reduce((acc, p) => acc + montantNum(p), 0);
   const caTermine = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
-  const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + montantNum(p), 0);
+  const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "Acompte payé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + montantNum(p), 0);
   const acompteTotal = prestations.reduce((acc, p) => acc + acompteNum(p), 0);
   const resteAEncaisser = caTotal - acompteTotal;
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
           {[
             { label: "Total", count: prestations.length },
-            { label: "À venir", count: prestations.filter(p => p.statut === "À venir" || p.statut === "Confirmé" || p.statut === "En attente de l'acompte").length },
+            { label: "À venir", count: prestations.filter(p => ["À venir", "Confirmé", "Acompte payé", "En attente de l'acompte"].includes(p.statut)).length },
             { label: "En cours", count: prestations.filter(p => p.statut === "En cours").length },
             { label: "Terminées", count: prestations.filter(p => p.statut === "Évènement terminé").length },
           ].map(s => (

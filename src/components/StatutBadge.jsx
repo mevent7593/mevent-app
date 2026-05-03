@@ -5,6 +5,7 @@ const couleurs = {
   "Évènement terminé": { bg: "#1a1a1a", text: "#aaa", border: "#555" },
   "Confirmé": { bg: "#2e1a2e", text: "#fff", border: "#C9A84C" },
   "En attente de l'acompte": { bg: "#2e2a1a", text: "#FFA500", border: "#FFA500" },
+  "Acompte payé": { bg: "#1a2e2e", text: "#00BCD4", border: "#00BCD4" },
 };
 
 export default function StatutBadge({ statut }) {
