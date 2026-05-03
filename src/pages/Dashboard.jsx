@@ -21,10 +21,12 @@ export default function Dashboard() {
 
   const affichees = filtre === "Tous" ? prestations : prestations.filter(p => p.statut === filtre);
 
-  const caTotal = prestations.reduce((acc, p) => acc + (p.montant || 0), 0);
-  const caTermine = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + (p.montant || 0), 0);
-  const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + (p.montant || 0), 0);
-  const acompteTotal = prestations.reduce((acc, p) => acc + (p.acompte || 0), 0);
+  const montantNum = (p) => Number(p.montant) || 0;
+  const acompteNum = (p) => Number(p.acompte) || 0;
+  const caTotal = prestations.reduce((acc, p) => acc + montantNum(p), 0);
+  const caTermine = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
+  const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + montantNum(p), 0);
+  const acompteTotal = prestations.reduce((acc, p) => acc + acompteNum(p), 0);
   const resteAEncaisser = caTotal - acompteTotal;
 
   return (
