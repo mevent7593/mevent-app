@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrestationCard from "../components/PrestationCard";
 
-const FILTRES = ["Tous", "À venir", "Acompte payé", "Évènement terminé", "En attente de l'acompte"];
+const FILTRES = ["Tous", "À venir", "Acompte payé", "Évènement terminé"];
 const STATUTS_A_VENIR = ["À venir", "Confirmé", "En cours"];
 const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°"];
