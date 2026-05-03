@@ -103,7 +103,7 @@ export default function Planning() {
             {/* Entêtes jours */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #2a2a2a" }}>
               {JOURS.map(j => (
-                <div key={j} style={{ padding: "10px 0", textAlign: "center", color: "#555", fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>{j}</div>
+                <div key={j} style={{ padding: "10px 0", textAlign: "center", color: "#555", fontSize: 12, fontWeight: 600 }}>{j}</div>
               ))}
             </div>
 
