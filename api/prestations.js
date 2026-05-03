@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       type: page.properties["Type d'événement"]?.select?.name ?? "",
       formule: page.properties["Machine utilisée "]?.multi_select?.map(m => m.name).join(", ") ?? "",
       date: page.properties["Date réservé"]?.date?.start ?? null,
-      lieu: (page.properties["Lieu"]?.rich_text?.[0]?.plain_text ?? "").replace(/\s*See More\s*/gi, "").trim(),
+      lieu: (page.properties["Lieu"]?.rich_text?.map(r => r.plain_text).join("") ?? "").replace(/\s*See More\s*/gi, "").trim(),
       montant: page.properties["Prix de la presta "]?.number ?? 0,
       acompte: page.properties["Acompte payé"]?.number ?? 0,
       statut: page.properties["Statut de l'évènement"]?.select?.name ?? "À venir",
