@@ -153,6 +153,11 @@ export default function Planning() {
                             title={`${p.client} — ${p.lieu || ""}`}
                           >
                             {p.client}
+                            {p.extras?.length > 0 && (
+                              <div style={{ fontSize: 10, fontWeight: 400, opacity: 0.8, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                                +{p.extras.join(", ")}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </>
