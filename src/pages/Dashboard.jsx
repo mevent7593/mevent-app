@@ -43,12 +43,20 @@ export default function Dashboard() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img src="/logo.png" alt="M'event" style={{ height: 125, objectFit: "contain", mixBlendMode: "lighten" }} />
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
-        >
-          + Nouvelle prestation
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            onClick={() => navigate("/planning")}
+            style={{ background: "transparent", color: "#C9A84C", border: "1px solid #C9A84C", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+          >
+            📅 Planning
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+          >
+            + Nouvelle prestation
+          </button>
+        </div>
       </div>
 
       <div style={{ padding: "32px" }}>
