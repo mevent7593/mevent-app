@@ -5,7 +5,7 @@ import PrestationCard from "../components/PrestationCard";
 const FILTRES = ["Tous", "À venir", "Acompte payé", "Évènement terminé"];
 const STATUTS_A_VENIR = ["À venir", "Confirmé", "En cours", "Acompte payé"];
 const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
-const MACHINES = ["Photo Booth", "Vidéo Booth 360°"];
+const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
 
 export default function Dashboard() {
   const [prestations, setPrestations] = useState([]);
