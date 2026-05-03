@@ -82,6 +82,7 @@ export default function Prestation() {
               { label: "Email", value: prestation.email || "—" },
               { label: "Filtre", value: prestation.filtre || "—" },
               { label: "Équipe", value: prestation.bosseurs?.join(", ") || "—" },
+              { label: "Extras", value: prestation.extras?.length ? prestation.extras.join(", ") : "—" },
             ].map(d => (
               <div key={d.label}>
                 <div style={{ color: "#555", fontSize: 12, marginBottom: 4 }}>{d.label}</div>

@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       acompte: page.properties["Acompte payé"]?.number ?? 0,
       statut: page.properties["Statut de l'évènement"]?.select?.name ?? "À venir",
       bosseurs: page.properties["Les Bosseurs"]?.multi_select?.map(b => b.name) ?? [],
+      extras: page.properties["Extras"]?.multi_select?.map(e => e.name) ?? [],
       telephone: page.properties["Téléphone"]?.phone_number ?? "",
       email: page.properties["E-mail"]?.email ?? "",
       filtre: page.properties["Nom sur le filtre"]?.rich_text?.[0]?.plain_text ?? "",
@@ -61,7 +62,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { nom, prenom, type, machine, date, creneau, lieu, montant, acompte, telephone, email, filtre, musique, bosseurs, statut } = req.body;
+    const { nom, prenom, type, machine, date, creneau, lieu, montant, acompte, telephone, email, filtre, musique, bosseurs, extras, statut } = req.body;
 
     const page = await createPage(DB_ID, {
       "Nom": { title: [{ text: { content: nom } }] },
@@ -78,6 +79,7 @@ export default async function handler(req, res) {
       "Nom sur le filtre": { rich_text: [{ text: { content: filtre || "" } }] },
       "Musique choisi": { url: musique || null },
       "Les Bosseurs": { multi_select: (bosseurs || []).map(b => ({ name: b })) },
+      "Extras": { multi_select: (extras || []).map(e => ({ name: e })) },
       "Statut de l'évènement": { select: { name: statut || "À venir" } },
     });
 

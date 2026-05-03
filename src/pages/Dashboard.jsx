@@ -163,7 +163,7 @@ const BOSSEURS = ["Lassana", "Hamza", "Ibrahima", "Moussa", "Joseph"];
 const STATUTS = ["À venir", "Acompte payé", "En cours", "Évènement terminé"];
 
 function NouvellePrestation({ onClose, onSaved }) {
-  const [form, setForm] = useState({ nom: "", prenom: "", type: "Photo Booth", machine: [], date: "", creneau: "", lieu: "", montant: "", acompte: "", telephone: "", email: "", filtre: "", musique: "", bosseurs: [], statut: "À venir" });
+  const [form, setForm] = useState({ nom: "", prenom: "", type: "Photo Booth", machine: [], date: "", creneau: "", lieu: "", montant: "", acompte: "", telephone: "", email: "", filtre: "", musique: "", bosseurs: [], extras: "", statut: "À venir" });
   const [saving, setSaving] = useState(false);
 
   const toggleMachine = (m) => setForm(p => ({ ...p, machine: p.machine.includes(m) ? p.machine.filter(x => x !== m) : [...p.machine, m] }));
@@ -175,7 +175,7 @@ function NouvellePrestation({ onClose, onSaved }) {
     const res = await fetch("/api/prestations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, montant: Number(form.montant), acompte: Number(form.acompte) }),
+      body: JSON.stringify({ ...form, montant: Number(form.montant), acompte: Number(form.acompte), extras: form.extras ? form.extras.split(",").map(e => e.trim()).filter(Boolean) : [] }),
     });
     const data = await res.json();
     onSaved({ ...form, id: data.id, client: `${form.nom} ${form.prenom}`.trim(), formule: form.machine.join(", "), montant: Number(form.montant), acompte: Number(form.acompte) });
@@ -272,6 +272,10 @@ function NouvellePrestation({ onClose, onSaved }) {
                 }}>{b}</button>
               ))}
             </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Extras (noms séparés par des virgules)</label>
+            <input value={form.extras} onChange={e => setForm(p => ({ ...p, extras: e.target.value }))} style={inputStyle} placeholder="Karim, Samir" />
           </div>
           <div>
             <label style={labelStyle}>Statut</label>
