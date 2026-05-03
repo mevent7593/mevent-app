@@ -8,6 +8,7 @@ const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autr
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [prestations, setPrestations] = useState([]);
   const [filtre, setFiltre] = useState("Tous");
   const [loading, setLoading] = useState(true);
