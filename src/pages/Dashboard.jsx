@@ -13,7 +13,6 @@ export default function Dashboard() {
   const [filtre, setFiltre] = useState("Tous");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showCA, setShowCA] = useState(false);
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -28,14 +27,6 @@ export default function Dashboard() {
       ? prestations.filter(p => STATUTS_A_VENIR.includes(p.statut))
       : prestations.filter(p => p.statut === filtre);
 
-  const montantNum = (p) => Number(p.montant) || 0;
-  const acompteNum = (p) => Number(p.acompte) || 0;
-  const caTotal = prestations.reduce((acc, p) => acc + montantNum(p), 0);
-  const caTermine = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
-  const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "Acompte payé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + montantNum(p), 0);
-  const acompteTotal = prestations.reduce((acc, p) => acc + acompteNum(p), 0);
-  const nonTerminees = prestations.filter(p => !["Évènement terminé", "En cours"].includes(p.statut));
-  const resteAEncaisser = nonTerminees.reduce((acc, p) => acc + (montantNum(p) - acompteNum(p)), 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "Inter, sans-serif" }}>
@@ -50,6 +41,12 @@ export default function Dashboard() {
             style={{ background: "transparent", color: "#C9A84C", border: "1px solid #C9A84C", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
           >
             📅 Planning
+          </button>
+          <button
+            onClick={() => navigate("/finance")}
+            style={{ background: "transparent", color: "#4CAF50", border: "1px solid #4CAF50", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+          >
+            📊 Finances
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -74,49 +71,6 @@ export default function Dashboard() {
               <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{s.label}</div>
             </div>
           ))}
-        </div>
-
-        {/* Chiffres d'affaires (accordéon) */}
-        <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24, marginBottom: 32 }}>
-          <div
-            onClick={() => setShowCA(v => !v)}
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
-          >
-            <h3 style={{ margin: 0, color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Chiffres d'affaires</h3>
-            <span style={{ color: "#555", fontSize: 18 }}>{showCA ? "▲" : "▼"}</span>
-          </div>
-
-          {showCA && (
-            <div style={{ marginTop: 20 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-                {[
-                  { label: "CA Total", value: caTotal, color: "#C9A84C" },
-                  { label: "CA Terminé", value: caTermine, color: "#4CAF50" },
-                  { label: "CA À venir", value: caAVenir, color: "#2196F3" },
-                  { label: "Reste à encaisser", value: resteAEncaisser, color: "#ff9800" },
-                ].map(item => (
-                  <div key={item.label} style={{ background: "#0a0a0a", borderRadius: 10, padding: "16px 20px" }}>
-                    <div style={{ color: item.color, fontSize: 24, fontWeight: 700 }}>
-                      {item.value.toLocaleString("fr-FR")} €
-                    </div>
-                    <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>{item.label}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #1a1a1a", display: "flex", gap: 24 }}>
-                <div style={{ fontSize: 13 }}>
-                  <span style={{ color: "#555" }}>Acomptes encaissés : </span>
-                  <span style={{ color: "#C9A84C", fontWeight: 600 }}>{acompteTotal.toLocaleString("fr-FR")} €</span>
-                </div>
-                <div style={{ fontSize: 13 }}>
-                  <span style={{ color: "#555" }}>Prestation moyenne : </span>
-                  <span style={{ color: "#C9A84C", fontWeight: 600 }}>
-                    {prestations.length > 0 ? Math.round(caTotal / prestations.length).toLocaleString("fr-FR") : 0} €
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Filtres */}
