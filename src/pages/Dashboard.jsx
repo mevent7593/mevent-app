@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrestationCard from "../components/PrestationCard";
 
-const FILTRES = ["Tous", "À venir", "Confirmé", "Acompte payé", "En cours", "Évènement terminé", "En attente de l'acompte"];
+const FILTRES = ["Tous", "À venir", "Acompte payé", "Évènement terminé", "En attente de l'acompte"];
+const STATUTS_A_VENIR = ["À venir", "Confirmé", "En cours"];
 const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°"];
 
@@ -19,7 +20,11 @@ export default function Dashboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  const affichees = filtre === "Tous" ? prestations : prestations.filter(p => p.statut === filtre);
+  const affichees = filtre === "Tous"
+    ? prestations
+    : filtre === "À venir"
+      ? prestations.filter(p => STATUTS_A_VENIR.includes(p.statut))
+      : prestations.filter(p => p.statut === filtre);
 
   const montantNum = (p) => Number(p.montant) || 0;
   const acompteNum = (p) => Number(p.acompte) || 0;
