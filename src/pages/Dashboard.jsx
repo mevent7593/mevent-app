@@ -150,16 +150,15 @@ export default function Dashboard() {
   );
 }
 
+const BOSSEURS = ["Lassana", "Hamza", "Ibrahima", "Moussa", "Joseph"];
+const STATUTS = ["À venir", "Acompte payé", "En cours", "Évènement terminé"];
+
 function NouvellePrestation({ onClose, onSaved }) {
-  const [form, setForm] = useState({ nom: "", prenom: "", type: "Photo Booth", machine: [], date: "", lieu: "", montant: "", telephone: "", email: "", filtre: "" });
+  const [form, setForm] = useState({ nom: "", prenom: "", type: "Photo Booth", machine: [], date: "", creneau: "", lieu: "", montant: "", acompte: "", telephone: "", email: "", filtre: "", musique: "", bosseurs: [], statut: "À venir" });
   const [saving, setSaving] = useState(false);
 
-  const toggleMachine = (m) => {
-    setForm(p => ({
-      ...p,
-      machine: p.machine.includes(m) ? p.machine.filter(x => x !== m) : [...p.machine, m]
-    }));
-  };
+  const toggleMachine = (m) => setForm(p => ({ ...p, machine: p.machine.includes(m) ? p.machine.filter(x => x !== m) : [...p.machine, m] }));
+  const toggleBosseur = (b) => setForm(p => ({ ...p, bosseurs: p.bosseurs.includes(b) ? p.bosseurs.filter(x => x !== b) : [...p.bosseurs, b] }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -167,10 +166,10 @@ function NouvellePrestation({ onClose, onSaved }) {
     const res = await fetch("/api/prestations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, montant: Number(form.montant) }),
+      body: JSON.stringify({ ...form, montant: Number(form.montant), acompte: Number(form.acompte) }),
     });
     const data = await res.json();
-    onSaved({ ...form, id: data.id, client: `${form.nom} ${form.prenom}`.trim(), formule: form.machine.join(", "), statut: "À venir", montant: Number(form.montant) });
+    onSaved({ ...form, id: data.id, client: `${form.nom} ${form.prenom}`.trim(), formule: form.machine.join(", "), montant: Number(form.montant), acompte: Number(form.acompte) });
   };
 
   const inputStyle = { width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: 8, padding: "10px 12px", color: "#fff", fontSize: 14, boxSizing: "border-box" };
@@ -191,9 +190,15 @@ function NouvellePrestation({ onClose, onSaved }) {
               <input value={form.prenom} onChange={e => setForm(p => ({ ...p, prenom: e.target.value }))} style={inputStyle} placeholder="Marie" />
             </div>
           </div>
-          <div>
-            <label style={labelStyle}>Date *</label>
-            <input required type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Date *</label>
+              <input required type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Créneau horaire</label>
+              <input value={form.creneau} onChange={e => setForm(p => ({ ...p, creneau: e.target.value }))} style={inputStyle} placeholder="18h - 23h" />
+            </div>
           </div>
           <div>
             <label style={labelStyle}>Lieu</label>
@@ -207,7 +212,7 @@ function NouvellePrestation({ onClose, onSaved }) {
           </div>
           <div>
             <label style={labelStyle}>Machine utilisée</label>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {MACHINES.map(m => (
                 <button key={m} type="button" onClick={() => toggleMachine(m)} style={{
                   background: form.machine.includes(m) ? "#C9A84C" : "#0a0a0a",
@@ -224,17 +229,46 @@ function NouvellePrestation({ onClose, onSaved }) {
               <input type="number" value={form.montant} onChange={e => setForm(p => ({ ...p, montant: e.target.value }))} style={inputStyle} placeholder="300" />
             </div>
             <div>
+              <label style={labelStyle}>Acompte payé (€)</label>
+              <input type="number" value={form.acompte} onChange={e => setForm(p => ({ ...p, acompte: e.target.value }))} style={inputStyle} placeholder="100" />
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
               <label style={labelStyle}>Téléphone</label>
               <input value={form.telephone} onChange={e => setForm(p => ({ ...p, telephone: e.target.value }))} style={inputStyle} placeholder="06 00 00 00 00" />
             </div>
-          </div>
-          <div>
-            <label style={labelStyle}>Email client</label>
-            <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} placeholder="client@email.com" />
+            <div>
+              <label style={labelStyle}>Email client</label>
+              <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} placeholder="client@email.com" />
+            </div>
           </div>
           <div>
             <label style={labelStyle}>Nom sur le filtre</label>
             <input value={form.filtre} onChange={e => setForm(p => ({ ...p, filtre: e.target.value }))} style={inputStyle} placeholder="Marie & Thomas" />
+          </div>
+          <div>
+            <label style={labelStyle}>Musique choisie (lien)</label>
+            <input value={form.musique} onChange={e => setForm(p => ({ ...p, musique: e.target.value }))} style={inputStyle} placeholder="https://..." />
+          </div>
+          <div>
+            <label style={labelStyle}>Les Bosseurs</label>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {BOSSEURS.map(b => (
+                <button key={b} type="button" onClick={() => toggleBosseur(b)} style={{
+                  background: form.bosseurs.includes(b) ? "#C9A84C" : "#0a0a0a",
+                  color: form.bosseurs.includes(b) ? "#000" : "#aaa",
+                  border: `1px solid ${form.bosseurs.includes(b) ? "#C9A84C" : "#2a2a2a"}`,
+                  borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, fontWeight: form.bosseurs.includes(b) ? 700 : 400
+                }}>{b}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Statut</label>
+            <select value={form.statut} onChange={e => setForm(p => ({ ...p, statut: e.target.value }))} style={inputStyle}>
+              {STATUTS.map(s => <option key={s}>{s}</option>)}
+            </select>
           </div>
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button type="button" onClick={onClose} style={{ flex: 1, background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 8, padding: "12px", cursor: "pointer" }}>Annuler</button>

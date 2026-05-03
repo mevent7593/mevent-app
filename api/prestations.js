@@ -61,7 +61,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { nom, prenom, type, machine, date, lieu, montant, telephone, email, filtre } = req.body;
+    const { nom, prenom, type, machine, date, creneau, lieu, montant, acompte, telephone, email, filtre, musique, bosseurs, statut } = req.body;
 
     const page = await createPage(DB_ID, {
       "Nom": { title: [{ text: { content: nom } }] },
@@ -69,12 +69,16 @@ export default async function handler(req, res) {
       "Type d'événement": { select: { name: type || "Photo Booth" } },
       "Machine utilisée ": { multi_select: (machine || []).map(m => ({ name: m })) },
       "Date réservé": { date: { start: date } },
+      "Créneau horaire": { rich_text: [{ text: { content: creneau || "" } }] },
       "Lieu": { rich_text: [{ text: { content: lieu || "" } }] },
       "Prix de la presta ": { number: montant || 0 },
+      "Acompte payé": { number: acompte || 0 },
       "Téléphone": { phone_number: telephone || "" },
       "E-mail": { email: email || "" },
       "Nom sur le filtre": { rich_text: [{ text: { content: filtre || "" } }] },
-      "Statut de l'évènement": { select: { name: "À venir" } },
+      "Musique choisi": { url: musique || null },
+      "Les Bosseurs": { multi_select: (bosseurs || []).map(b => ({ name: b })) },
+      "Statut de l'évènement": { select: { name: statut || "À venir" } },
     });
 
     return res.status(201).json({ id: page.id });
