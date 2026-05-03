@@ -27,7 +27,8 @@ export default function Dashboard() {
   const caTermine = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
   const caAVenir = prestations.filter(p => ["À venir", "Confirmé", "Acompte payé", "En attente de l'acompte"].includes(p.statut)).reduce((acc, p) => acc + montantNum(p), 0);
   const acompteTotal = prestations.reduce((acc, p) => acc + acompteNum(p), 0);
-  const resteAEncaisser = caTotal - acompteTotal;
+  const nonTerminees = prestations.filter(p => !["Évènement terminé", "En cours"].includes(p.statut));
+  const resteAEncaisser = nonTerminees.reduce((acc, p) => acc + (montantNum(p) - acompteNum(p)), 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "Inter, sans-serif" }}>
