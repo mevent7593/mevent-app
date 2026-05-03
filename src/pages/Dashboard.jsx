@@ -44,7 +44,7 @@ export default function Dashboard() {
 
       <div style={{ padding: "32px" }}>
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
           {[
             { label: "Total", count: prestations.length },
             { label: "À venir", count: prestations.filter(p => p.statut === "À venir" || p.statut === "Confirmé" || p.statut === "En attente de l'acompte").length },
@@ -61,7 +61,7 @@ export default function Dashboard() {
         {/* Chiffres d'affaires */}
         <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24, marginBottom: 32 }}>
           <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Chiffres d'affaires</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
             {[
               { label: "CA Total", value: caTotal, color: "#C9A84C" },
               { label: "CA Terminé", value: caTermine, color: "#4CAF50" },
