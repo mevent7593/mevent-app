@@ -7,45 +7,39 @@ import {
 
 const MOIS_LABELS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
 const COULEURS_PIE = ["#C9A84C", "#00BCD4", "#4CAF50", "#f44336", "#9C27B0", "#FF9800", "#2196F3", "#E91E63"];
-const TYPES_CHARGES = ["Matériel", "Charge fixe", "Charge variable"];
 
 function montantNum(p) { return Number(p.montant) || 0; }
 
 export default function Finance() {
   const navigate = useNavigate();
   const [prestations, setPrestations] = useState([]);
+  const [charges, setCharges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [annee, setAnnee] = useState(new Date().getFullYear());
-  const [charges, setCharges] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("mevent_charges") || "[]"); } catch { return []; }
-  });
-  const [formCharge, setFormCharge] = useState({ label: "", montant: "", type: "Charge fixe", date: new Date().toISOString().split("T")[0] });
 
   useEffect(() => {
-    fetch("/api/prestations")
-      .then(r => r.json())
-      .then(data => { setPrestations(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch("/api/prestations").then(r => r.json()),
+      fetch("/api/depenses").then(r => r.json()),
+    ]).then(([presta, deps]) => {
+      setPrestations(Array.isArray(presta) ? presta : []);
+      setCharges(Array.isArray(deps) ? deps : []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("mevent_charges", JSON.stringify(charges));
-  }, [charges]);
 
   const prestationsAnnee = prestations.filter(p => p.date && new Date(p.date).getFullYear() === annee);
 
   // Stats résumé
   const caTotal = prestationsAnnee.reduce((acc, p) => acc + montantNum(p), 0);
   const caEncaisse = prestationsAnnee.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
-  const acomptes = prestationsAnnee.reduce((acc, p) => acc + (Number(p.acompte) || 0), 0);
-  const totalCharges = charges.filter(c => new Date(c.date).getFullYear() === annee).reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
+  const totalCharges = charges.reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
   const beneficeNet = caEncaisse - totalCharges;
 
   // CA par mois
   const caParMois = MOIS_LABELS.map((label, i) => {
     const ca = prestationsAnnee.filter(p => new Date(p.date).getMonth() === i).reduce((acc, p) => acc + montantNum(p), 0);
-    const charge = charges.filter(c => c.date && new Date(c.date).getFullYear() === annee && new Date(c.date).getMonth() === i).reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
-    return { label, ca, charge, benefice: ca - charge };
+    return { label, ca, benefice: ca };
   });
 
   // Répartition par type
@@ -63,18 +57,6 @@ export default function Finance() {
     machines.forEach(m => { parMachine[m] = (parMachine[m] || 0) + montantNum(p); });
   });
   const dataMachine = Object.entries(parMachine).map(([name, value]) => ({ name: name.replace("Combiné (Photo Booth + Vidéo Booth 360°)", "Combiné"), value }));
-
-  const ajouterCharge = (e) => {
-    e.preventDefault();
-    if (!formCharge.label || !formCharge.montant) return;
-    setCharges(prev => [...prev, { id: Date.now(), ...formCharge, montant: Number(formCharge.montant) }]);
-    setFormCharge(p => ({ ...p, label: "", montant: "" }));
-  };
-
-  const supprimerCharge = (id) => setCharges(prev => prev.filter(c => c.id !== id));
-
-  const inputStyle = { width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: 8, padding: "10px 12px", color: "#fff", fontSize: 14, boxSizing: "border-box" };
-  const labelStyle = { color: "#888", fontSize: 12, display: "block", marginBottom: 6 };
 
   const tooltipStyle = { background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: 8, color: "#fff" };
 
@@ -188,53 +170,21 @@ export default function Finance() {
             </div>
           </div>
 
-          {/* Charges / Investissements */}
+          {/* Charges / Investissements depuis Notion */}
           <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24 }}>
             <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Charges & Investissements</h3>
-
-            <form onSubmit={ajouterCharge} style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto auto", gap: 10, marginBottom: 20, alignItems: "end" }}>
-              <div>
-                <label style={labelStyle}>Libellé</label>
-                <input required value={formCharge.label} onChange={e => setFormCharge(p => ({ ...p, label: e.target.value }))} style={inputStyle} placeholder="Ex: Assurance, Achat machine..." />
-              </div>
-              <div>
-                <label style={labelStyle}>Montant (€)</label>
-                <input required type="number" value={formCharge.montant} onChange={e => setFormCharge(p => ({ ...p, montant: e.target.value }))} style={{ ...inputStyle, width: 110 }} placeholder="0" />
-              </div>
-              <div>
-                <label style={labelStyle}>Type</label>
-                <select value={formCharge.type} onChange={e => setFormCharge(p => ({ ...p, type: e.target.value }))} style={{ ...inputStyle, width: 140 }}>
-                  {TYPES_CHARGES.map(t => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>Date</label>
-                <input type="date" value={formCharge.date} onChange={e => setFormCharge(p => ({ ...p, date: e.target.value }))} style={{ ...inputStyle, width: 140 }} />
-              </div>
-              <button type="submit" style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 14, whiteSpace: "nowrap" }}>
-                + Ajouter
-              </button>
-            </form>
-
             {charges.length === 0 ? (
               <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>Aucune charge enregistrée</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {charges.sort((a, b) => new Date(b.date) - new Date(a.date)).map(c => (
+                {charges.map(c => (
                   <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#0a0a0a", borderRadius: 8 }}>
-                    <div>
-                      <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
-                      <span style={{ color: "#555", fontSize: 12, marginLeft: 10 }}>{c.type}</span>
-                      <span style={{ color: "#555", fontSize: 12, marginLeft: 10 }}>{new Date(c.date).toLocaleDateString("fr-FR")}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ color: "#f44336", fontWeight: 700 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
-                      <button onClick={() => supprimerCharge(c.id)} style={{ background: "transparent", border: "none", color: "#555", cursor: "pointer", fontSize: 16 }}>✕</button>
-                    </div>
+                    <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
+                    <span style={{ color: "#f44336", fontWeight: 700 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
                   </div>
                 ))}
                 <div style={{ borderTop: "1px solid #2a2a2a", marginTop: 8, paddingTop: 12, textAlign: "right" }}>
-                  <span style={{ color: "#555", fontSize: 13 }}>Total charges {annee} : </span>
+                  <span style={{ color: "#555", fontSize: 13 }}>Total charges : </span>
                   <span style={{ color: "#f44336", fontWeight: 700, fontSize: 16 }}>{totalCharges.toLocaleString("fr-FR")} €</span>
                 </div>
               </div>
