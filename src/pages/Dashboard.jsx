@@ -59,6 +59,21 @@ export default function Dashboard() {
       </div>
 
       <div style={{ padding: "32px" }}>
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
+          {[
+            { label: "Total", count: prestations.length },
+            { label: "À venir", count: prestations.filter(p => STATUTS_A_VENIR.includes(p.statut)).length },
+            { label: "En cours", count: prestations.filter(p => p.statut === "En cours").length },
+            { label: "Terminées", count: prestations.filter(p => p.statut === "Évènement terminé").length },
+          ].map(s => (
+            <div key={s.label} style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px" }}>
+              <div style={{ color: "#C9A84C", fontSize: 32, fontWeight: 700 }}>{s.count}</div>
+              <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
         {loading ? (
           <div style={{ color: "#888", textAlign: "center", marginTop: 60 }}>Chargement...</div>
         ) : (
