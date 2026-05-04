@@ -2,17 +2,22 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrestationCard from "../components/PrestationCard";
 
-const FILTRES = ["Tous", "À venir", "Acompte payé", "Évènement terminé"];
 const STATUTS_A_VENIR = ["À venir", "Confirmé", "En cours", "Acompte payé"];
 const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
 
+const DOSSIERS = [
+  { label: "À venir", couleur: "#C9A84C", icone: "📅", statuts: ["À venir", "Confirmé", "En cours"] },
+  { label: "Acompte payé", couleur: "#00BCD4", icone: "💳", statuts: ["Acompte payé"] },
+  { label: "Évènement terminé", couleur: "#555", icone: "✅", statuts: ["Évènement terminé"] },
+];
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [prestations, setPrestations] = useState([]);
-  const [filtre, setFiltre] = useState("Tous");
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [ouverts, setOuverts] = useState({ "À venir": true, "Acompte payé": false, "Évènement terminé": false });
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -21,11 +26,7 @@ export default function Dashboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  const affichees = filtre === "Tous"
-    ? prestations
-    : filtre === "À venir"
-      ? prestations.filter(p => STATUTS_A_VENIR.includes(p.statut))
-      : prestations.filter(p => p.statut === filtre);
+  const toggleDossier = (label) => setOuverts(prev => ({ ...prev, [label]: !prev[label] }));
 
 
   return (
@@ -58,47 +59,43 @@ export default function Dashboard() {
       </div>
 
       <div style={{ padding: "32px" }}>
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 32 }}>
-          {[
-            { label: "Total", count: prestations.length },
-            { label: "À venir", count: prestations.filter(p => [...STATUTS_A_VENIR, "Acompte payé"].includes(p.statut)).length },
-            { label: "En cours", count: prestations.filter(p => p.statut === "En cours").length },
-            { label: "Terminées", count: prestations.filter(p => p.statut === "Évènement terminé").length },
-          ].map(s => (
-            <div key={s.label} style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px" }}>
-              <div style={{ color: "#C9A84C", fontSize: 32, fontWeight: 700 }}>{s.count}</div>
-              <div style={{ color: "#888", fontSize: 13, marginTop: 4 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filtres */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-          {FILTRES.map(f => (
-            <button key={f} onClick={() => setFiltre(f)} style={{
-              background: filtre === f ? "#C9A84C" : "#111",
-              color: filtre === f ? "#000" : "#aaa",
-              border: `1px solid ${filtre === f ? "#C9A84C" : "#2a2a2a"}`,
-              borderRadius: 20, padding: "6px 16px", cursor: "pointer",
-              fontWeight: filtre === f ? 700 : 400, fontSize: 13,
-            }}>
-              {f}
-            </button>
-          ))}
-        </div>
-
-        {/* Liste */}
         {loading ? (
           <div style={{ color: "#888", textAlign: "center", marginTop: 60 }}>Chargement...</div>
-        ) : affichees.length === 0 ? (
-          <div style={{ color: "#555", textAlign: "center", marginTop: 60 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-            <div>Aucune prestation {filtre !== "Tous" ? `"${filtre}"` : ""}</div>
-          </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {affichees.map(p => <PrestationCard key={p.id} prestation={p} />)}
+            {DOSSIERS.map(dossier => {
+              const items = prestations.filter(p => dossier.statuts.includes(p.statut));
+              const ouvert = ouverts[dossier.label];
+              return (
+                <div key={dossier.label} style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 12, overflow: "hidden" }}>
+                  {/* En-tête dossier */}
+                  <div
+                    onClick={() => toggleDossier(dossier.label)}
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", cursor: "pointer", borderLeft: `4px solid ${dossier.couleur}` }}
+                  >
+                    <span style={{ fontSize: 18 }}>{ouvert ? "📂" : "📁"}</span>
+                    <span style={{ fontWeight: 700, fontSize: 15, color: "#fff", flex: 1 }}>{dossier.label}</span>
+                    <span style={{ background: dossier.couleur, color: dossier.couleur === "#555" ? "#aaa" : "#000", borderRadius: 20, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>
+                      {items.length}
+                    </span>
+                    <span style={{ color: "#555", fontSize: 18 }}>{ouvert ? "▲" : "▼"}</span>
+                  </div>
+
+                  {/* Contenu dossier */}
+                  {ouvert && (
+                    <div style={{ borderTop: "1px solid #1a1a1a" }}>
+                      {items.length === 0 ? (
+                        <div style={{ color: "#555", textAlign: "center", padding: "20px", fontSize: 14 }}>Aucune prestation</div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                          {items.map(p => <PrestationCard key={p.id} prestation={p} />)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
