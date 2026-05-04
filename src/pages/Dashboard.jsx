@@ -7,8 +7,7 @@ const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autr
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
 
 const DOSSIERS = [
-  { label: "À venir", couleur: "#C9A84C", icone: "📅", statuts: ["À venir", "Confirmé", "En cours"] },
-  { label: "Acompte payé", couleur: "#00BCD4", icone: "💳", statuts: ["Acompte payé"] },
+  { label: "À venir", couleur: "#C9A84C", icone: "📅", statuts: ["À venir", "Confirmé", "En cours", "Acompte payé"] },
   { label: "Évènement terminé", couleur: "#555", icone: "✅", statuts: ["Évènement terminé"] },
 ];
 
