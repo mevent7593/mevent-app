@@ -8,6 +8,7 @@ const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + 
 
 const DOSSIERS = [
   { label: "À venir", couleur: "#C9A84C", icone: "📅", statuts: ["À venir", "Confirmé", "En cours", "Acompte payé"] },
+  { label: "Acompte payé", couleur: "#00BCD4", icone: "💳", statuts: ["Acompte payé"] },
   { label: "Évènement terminé", couleur: "#555", icone: "✅", statuts: ["Évènement terminé"] },
 ];
 
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [ouverts, setOuverts] = useState({ "À venir": true, "Acompte payé": false, "Évènement terminé": false });
+
 
   useEffect(() => {
     fetch("/api/prestations")
