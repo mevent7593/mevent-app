@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import StatutBadge from "./StatutBadge";
 
 const couleurBordure = {
+  "Devis": "#FF9800",
   "À venir": "#C9A84C",
   "Confirmé": "#C9A84C",
   "En attente de l'acompte": "#FFA500",

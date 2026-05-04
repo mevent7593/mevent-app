@@ -1,4 +1,5 @@
 const couleurs = {
+  "Devis": { bg: "#2e1e0a", text: "#FF9800", border: "#FF9800" },
   "À venir": { bg: "#1a1a2e", text: "#C9A84C", border: "#C9A84C" },
   "En cours": { bg: "#1a2e1a", text: "#4CAF50", border: "#4CAF50" },
   "Terminé": { bg: "#1a1a1a", text: "#aaa", border: "#555" },

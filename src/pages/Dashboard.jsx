@@ -7,6 +7,7 @@ const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autr
 const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
 
 const DOSSIERS = [
+  { label: "Devis", couleur: "#FF9800", icone: "📋", statuts: ["Devis"] },
   { label: "À venir", couleur: "#C9A84C", icone: "📅", statuts: ["À venir", "Confirmé", "En cours", "Acompte payé"] },
   { label: "Acompte payé", couleur: "#00BCD4", icone: "💳", statuts: ["Acompte payé"] },
   { label: "Évènement terminé", couleur: "#555", icone: "✅", statuts: ["Évènement terminé"] },
@@ -17,8 +18,7 @@ export default function Dashboard() {
   const [prestations, setPrestations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [ouverts, setOuverts] = useState({ "À venir": true, "Acompte payé": false, "Évènement terminé": false });
-
+  const [ouverts, setOuverts] = useState({ "Devis": true, "À venir": true, "Acompte payé": false, "Évènement terminé": false });
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -127,7 +127,7 @@ export default function Dashboard() {
 }
 
 const BOSSEURS = ["Lassana", "Hamza", "Ibrahima", "Moussa", "Joseph"];
-const STATUTS = ["À venir", "Acompte payé", "En cours", "Évènement terminé"];
+const STATUTS = ["Devis", "À venir", "Acompte payé", "En cours", "Évènement terminé"];
 
 function NouvellePrestation({ onClose, onSaved }) {
   const [form, setForm] = useState({ nom: "", prenom: "", type: "Photo Booth", machine: [], date: "", creneau: "", lieu: "", montant: "", acompte: "", telephone: "", email: "", filtre: "", musique: "", bosseurs: [], extras: "", statut: "À venir" });

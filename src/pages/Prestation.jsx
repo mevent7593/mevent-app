@@ -9,6 +9,7 @@ export default function Prestation() {
   const [dispos, setDispos] = useState([]);
   const [confirming, setConfirming] = useState(false);
   const [confirme, setConfirme] = useState(false);
+  const [validating, setValidating] = useState(false);
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -24,6 +25,17 @@ export default function Prestation() {
       .then(d => setDispos(Array.isArray(d) ? d : []))
       .catch(() => {});
   }, [id]);
+
+  const handleValiderDevis = async () => {
+    setValidating(true);
+    await fetch("/api/statut", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prestationId: id, statut: "À venir" }),
+    });
+    setPrestation(p => ({ ...p, statut: "À venir" }));
+    setValidating(false);
+  };
 
   const handleConfirmer = async () => {
     setConfirming(true);
@@ -91,6 +103,18 @@ export default function Prestation() {
             ))}
           </div>
         </div>
+
+        {/* Valider devis */}
+        {prestation.statut === "Devis" && (
+          <div style={{ background: "#111", border: "1px solid #FF9800", borderRadius: 12, padding: 24, marginBottom: 24, textAlign: "center" }}>
+            <p style={{ color: "#aaa", margin: "0 0 16px", fontSize: 14 }}>
+              Le client a accepté le devis ? Validez pour le passer en prestation à venir.
+            </p>
+            <button onClick={handleValiderDevis} disabled={validating} style={{ background: "#FF9800", color: "#000", border: "none", borderRadius: 8, padding: "14px 32px", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
+              {validating ? "Validation..." : "Valider le devis"}
+            </button>
+          </div>
+        )}
 
         {/* Confirmer */}
         {!confirme && (prestation.statut === "À venir" || prestation.statut === "En attente de l'acompte") && (
