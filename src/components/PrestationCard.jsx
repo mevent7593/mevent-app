@@ -1,49 +1,78 @@
 import { useNavigate } from "react-router-dom";
 import StatutBadge from "./StatutBadge";
 
-const statutsCouleurs = {
+const couleurBordure = {
   "À venir": "#C9A84C",
   "Confirmé": "#C9A84C",
+  "En attente de l'acompte": "#FFA500",
+  "Acompte payé": "#00BCD4",
   "En cours": "#4CAF50",
-  "Terminé": "#555",
+  "Évènement terminé": "#333",
 };
+
+function tronquer(texte, max) {
+  if (!texte) return "";
+  const propre = texte.replace(/\s*See More\s*/gi, "").trim();
+  return propre.length > max ? propre.slice(0, max) + "…" : propre;
+}
 
 export default function PrestationCard({ prestation }) {
   const navigate = useNavigate();
   const date = prestation.date
-    ? new Date(prestation.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
-    : "Date non définie";
+    ? new Date(prestation.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+    : "—";
+  const couleur = couleurBordure[prestation.statut] ?? "#C9A84C";
 
   return (
     <div
       onClick={() => navigate(`/prestation/${prestation.id}`)}
       style={{
         background: "#111",
-        border: "1px solid #2a2a2a",
-        borderRadius: 12,
-        padding: "20px 24px",
+        borderLeft: `4px solid ${couleur}`,
+        borderTop: "1px solid #1a1a1a",
+        borderRight: "1px solid #1a1a1a",
+        borderBottom: "1px solid #1a1a1a",
+        borderRadius: 8,
+        padding: "12px 20px",
         cursor: "pointer",
-        transition: "border-color 0.2s",
+        display: "flex",
+        alignItems: "center",
+        gap: 16,
+        minHeight: 52,
+        transition: "background 0.15s",
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = "#C9A84C"}
-      onMouseLeave={e => e.currentTarget.style.borderColor = "#2a2a2a"}
+      onMouseEnter={e => e.currentTarget.style.background = "#161616"}
+      onMouseLeave={e => e.currentTarget.style.background = "#111"}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-        <h3 style={{ margin: 0, color: "#fff", fontSize: 18 }}>{prestation.client}</h3>
-        <StatutBadge statut={prestation.statut} />
+      {/* Nom client */}
+      <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", minWidth: 160, flex: "0 0 auto" }}>
+        {prestation.client || "—"}
       </div>
-      {prestation.type && (
-        <div style={{ color: "#C9A84C", fontSize: 13, marginBottom: 8 }}>
-          {prestation.type}{prestation.formule ? ` — ${prestation.formule}` : ""}
+
+      {/* Date */}
+      <div style={{ color: "#666", fontSize: 13, minWidth: 110, flex: "0 0 auto" }}>
+        📅 {date}
+      </div>
+
+      {/* Lieu tronqué */}
+      <div style={{ color: "#555", fontSize: 13, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+        {prestation.lieu ? `📍 ${tronquer(prestation.lieu, 40)}` : ""}
+      </div>
+
+      {/* Montant */}
+      {prestation.montant > 0 && (
+        <div style={{ color: "#C9A84C", fontSize: 14, fontWeight: 600, flex: "0 0 auto" }}>
+          {prestation.montant.toLocaleString("fr-FR")} €
         </div>
       )}
-      <div style={{ color: "#888", fontSize: 13, display: "flex", gap: 16, flexWrap: "wrap" }}>
-        <span>📅 {date}</span>
-        {prestation.lieu && <span>📍 {prestation.lieu}</span>}
-        {prestation.montant > 0 && <span>💶 {prestation.montant}€</span>}
-        {prestation.bosseurs?.length > 0 && <span>👥 {prestation.bosseurs.join(", ")}</span>}
-        {prestation.extras?.length > 0 && <span>➕ {prestation.extras.join(", ")}</span>}
+
+      {/* Statut */}
+      <div style={{ flex: "0 0 auto" }}>
+        <StatutBadge statut={prestation.statut} />
       </div>
+
+      {/* Flèche */}
+      <div style={{ color: "#333", fontSize: 18, flex: "0 0 auto" }}>›</div>
     </div>
   );
 }
