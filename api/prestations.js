@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       "Téléphone": { phone_number: telephone || "" },
       "E-mail": { email: email || "" },
       "Nom sur le filtre": { rich_text: [{ text: { content: filtre || "" } }] },
-      "Musique choisi": { url: musique || null },
+      "Musique choisi": { url: musique && musique.trim() ? musique.trim() : null },
       "Les Bosseurs": { multi_select: (bosseurs || []).map(b => ({ name: b })) },
       "Extras": { multi_select: (extras || []).map(e => ({ name: e })) },
       "Statut de l'évènement": { select: { name: statut || "À venir" } },
