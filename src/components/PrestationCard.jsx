@@ -45,19 +45,15 @@ export default function PrestationCard({ prestation }) {
       onMouseEnter={e => e.currentTarget.style.background = "#161616"}
       onMouseLeave={e => e.currentTarget.style.background = "#111"}
     >
-      {/* Nom client */}
-      <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", minWidth: 160, flex: "0 0 auto" }}>
-        {prestation.client || "—"}
-      </div>
-
-      {/* Date */}
-      <div style={{ color: "#666", fontSize: 13, minWidth: 110, flex: "0 0 auto" }}>
-        📅 {date}
+      {/* Nom client + date sur mobile */}
+      <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", flex: "1 1 0", minWidth: 0 }}>
+        <div style={{ wordBreak: "break-word" }}>{prestation.client || "—"}</div>
+        <div style={{ color: "#666", fontSize: 12, fontWeight: 400, marginTop: 2 }}>📅 {date}</div>
       </div>
 
       {/* Lieu tronqué */}
-      <div style={{ color: "#555", fontSize: 13, flex: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-        {prestation.lieu ? `📍 ${tronquer(prestation.lieu, 40)}` : ""}
+      <div style={{ color: "#555", fontSize: 13, flex: "0 1 auto", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", maxWidth: 120 }}>
+        {prestation.lieu ? `📍 ${tronquer(prestation.lieu, 25)}` : ""}
       </div>
 
       {/* Montant */}
