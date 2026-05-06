@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import StatutBadge from "../components/StatutBadge";
 
+const TYPES = ["Photo Booth", "Vidéo Booth 360°", "Pack Photo & Vidéo", "Autre"];
+const MACHINES = ["Photo Booth", "Vidéo Booth 360°", "Combiné (Photo Booth + Vidéo Booth 360°)"];
+const BOSSEURS = ["Lassana", "Hamza", "Ibrahima", "Moussa", "Joseph"];
+const STATUTS = ["Devis", "À venir", "Acompte payé", "En cours", "Confirmé", "Évènement terminé"];
+
 export default function Prestation() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,6 +15,8 @@ export default function Prestation() {
   const [confirming, setConfirming] = useState(false);
   const [confirme, setConfirme] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -49,6 +56,13 @@ export default function Prestation() {
     setPrestation(p => ({ ...p, statut: "Confirmé" }));
   };
 
+  const handleSupprimer = async () => {
+    if (!window.confirm("Supprimer cette prestation ? Cette action est irréversible.")) return;
+    setDeleting(true);
+    await fetch(`/api/prestation-update?id=${id}`, { method: "DELETE" });
+    navigate("/");
+  };
+
   if (!prestation) return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#888", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}>
       Chargement...
@@ -78,7 +92,13 @@ export default function Prestation() {
             <h1 style={{ margin: "0 0 8px", fontSize: 28 }}>{prestation.client}</h1>
             {prestation.type && <div style={{ color: "#C9A84C", fontSize: 15 }}>{prestation.type}{prestation.formule ? ` — ${prestation.formule}` : ""}</div>}
           </div>
-          <StatutBadge statut={prestation.statut} />
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <StatutBadge statut={prestation.statut} />
+            <button onClick={() => setShowEdit(true)} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}>✏️ Modifier</button>
+            <button onClick={handleSupprimer} disabled={deleting} style={{ background: "transparent", border: "1px solid #f44336", color: "#f44336", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}>
+              {deleting ? "..." : "🗑️ Supprimer"}
+            </button>
+          </div>
         </div>
 
         {/* Détails */}
@@ -144,11 +164,8 @@ export default function Prestation() {
               <span style={{ color: "#888" }}>{enAttente} en attente</span>
             </div>
           </div>
-
           {dispos.length === 0 ? (
-            <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>
-              Aucune réponse pour l'instant
-            </div>
+            <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>Aucune réponse pour l'instant</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {dispos.map(d => (
@@ -162,6 +179,136 @@ export default function Prestation() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Modal modification */}
+      {showEdit && (
+        <EditPrestation
+          prestation={prestation}
+          onClose={() => setShowEdit(false)}
+          onSaved={(updated) => { setPrestation(p => ({ ...p, ...updated })); setShowEdit(false); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditPrestation({ prestation, onClose, onSaved }) {
+  const nomParts = (prestation.client || "").split(" ");
+  const [form, setForm] = useState({
+    nom: nomParts[0] || "",
+    prenom: nomParts.slice(1).join(" ") || "",
+    date: prestation.date || "",
+    creneau: prestation.creneau || "",
+    lieu: prestation.lieu || "",
+    montant: prestation.montant || "",
+    acompte: prestation.acompte || "",
+    telephone: prestation.telephone || "",
+    email: prestation.email || "",
+    filtre: prestation.filtre || "",
+    musique: prestation.musique || "",
+    type: prestation.type || "Photo Booth",
+    machine: prestation.formule ? prestation.formule.split(", ").filter(Boolean) : [],
+    bosseurs: prestation.bosseurs || [],
+    extras: prestation.extras ? prestation.extras.join(", ") : "",
+    statut: prestation.statut || "À venir",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const toggleMachine = (m) => setForm(p => ({ ...p, machine: p.machine.includes(m) ? p.machine.filter(x => x !== m) : [...p.machine, m] }));
+  const toggleBosseur = (b) => setForm(p => ({ ...p, bosseurs: p.bosseurs.includes(b) ? p.bosseurs.filter(x => x !== b) : [...p.bosseurs, b] }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    await fetch(`/api/prestation-update?id=${prestation.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        montant: Number(form.montant),
+        acompte: Number(form.acompte),
+        extras: form.extras ? form.extras.split(",").map(e => e.trim()).filter(Boolean) : [],
+      }),
+    });
+    onSaved({
+      client: `${form.nom} ${form.prenom}`.trim(),
+      date: form.date,
+      lieu: form.lieu,
+      montant: Number(form.montant),
+      acompte: Number(form.acompte),
+      telephone: form.telephone,
+      email: form.email,
+      filtre: form.filtre,
+      type: form.type,
+      formule: form.machine.join(", "),
+      bosseurs: form.bosseurs,
+      extras: form.extras ? form.extras.split(",").map(e => e.trim()).filter(Boolean) : [],
+      statut: form.statut,
+    });
+  };
+
+  const inputStyle = { width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", borderRadius: 8, padding: "10px 12px", color: "#fff", fontSize: 14, boxSizing: "border-box" };
+  const labelStyle = { color: "#888", fontSize: 12, display: "block", marginBottom: 6 };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+      <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 16, padding: 32, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto" }}>
+        <h2 style={{ margin: "0 0 24px", color: "#fff" }}>Modifier la prestation</h2>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div><label style={labelStyle}>Nom</label><input value={form.nom} onChange={e => setForm(p => ({ ...p, nom: e.target.value }))} style={inputStyle} /></div>
+            <div><label style={labelStyle}>Prénom</label><input value={form.prenom} onChange={e => setForm(p => ({ ...p, prenom: e.target.value }))} style={inputStyle} /></div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div><label style={labelStyle}>Date</label><input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} style={inputStyle} /></div>
+            <div><label style={labelStyle}>Créneau</label><input value={form.creneau} onChange={e => setForm(p => ({ ...p, creneau: e.target.value }))} style={inputStyle} placeholder="18h - 23h" /></div>
+          </div>
+          <div><label style={labelStyle}>Lieu</label><input value={form.lieu} onChange={e => setForm(p => ({ ...p, lieu: e.target.value }))} style={inputStyle} /></div>
+          <div><label style={labelStyle}>Type d'événement</label>
+            <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} style={inputStyle}>
+              {TYPES.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Machine utilisée</label>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {MACHINES.map(m => (
+                <button key={m} type="button" onClick={() => toggleMachine(m)} style={{ background: form.machine.includes(m) ? "#C9A84C" : "#0a0a0a", color: form.machine.includes(m) ? "#000" : "#aaa", border: `1px solid ${form.machine.includes(m) ? "#C9A84C" : "#2a2a2a"}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, fontWeight: form.machine.includes(m) ? 700 : 400 }}>{m}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div><label style={labelStyle}>Prix (€)</label><input type="number" value={form.montant} onChange={e => setForm(p => ({ ...p, montant: e.target.value }))} style={inputStyle} /></div>
+            <div><label style={labelStyle}>Acompte (€)</label><input type="number" value={form.acompte} onChange={e => setForm(p => ({ ...p, acompte: e.target.value }))} style={inputStyle} /></div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div><label style={labelStyle}>Téléphone</label><input value={form.telephone} onChange={e => setForm(p => ({ ...p, telephone: e.target.value }))} style={inputStyle} /></div>
+            <div><label style={labelStyle}>Email</label><input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} /></div>
+          </div>
+          <div><label style={labelStyle}>Nom sur le filtre</label><input value={form.filtre} onChange={e => setForm(p => ({ ...p, filtre: e.target.value }))} style={inputStyle} /></div>
+          <div><label style={labelStyle}>Musique (lien)</label><input value={form.musique} onChange={e => setForm(p => ({ ...p, musique: e.target.value }))} style={inputStyle} /></div>
+          <div>
+            <label style={labelStyle}>Les Bosseurs</label>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {BOSSEURS.map(b => (
+                <button key={b} type="button" onClick={() => toggleBosseur(b)} style={{ background: form.bosseurs.includes(b) ? "#C9A84C" : "#0a0a0a", color: form.bosseurs.includes(b) ? "#000" : "#aaa", border: `1px solid ${form.bosseurs.includes(b) ? "#C9A84C" : "#2a2a2a"}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, fontWeight: form.bosseurs.includes(b) ? 700 : 400 }}>{b}</button>
+              ))}
+            </div>
+          </div>
+          <div><label style={labelStyle}>Extras (séparés par virgules)</label><input value={form.extras} onChange={e => setForm(p => ({ ...p, extras: e.target.value }))} style={inputStyle} /></div>
+          <div><label style={labelStyle}>Statut</label>
+            <select value={form.statut} onChange={e => setForm(p => ({ ...p, statut: e.target.value }))} style={inputStyle}>
+              {STATUTS.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <button type="button" onClick={onClose} style={{ flex: 1, background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 8, padding: "12px", cursor: "pointer" }}>Annuler</button>
+            <button type="submit" disabled={saving} style={{ flex: 1, background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "12px", fontWeight: 700, cursor: "pointer" }}>
+              {saving ? "Sauvegarde..." : "Enregistrer"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
