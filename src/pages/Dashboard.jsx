@@ -20,12 +20,14 @@ export default function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [ouverts, setOuverts] = useState({ "Devis": true, "À venir": true, "Acompte payé": false, "Évènement terminé": false });
 
-  useEffect(() => {
+  const chargerPrestations = () => {
     fetch("/api/prestations")
       .then(r => r.json())
       .then(data => { setPrestations(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { chargerPrestations(); }, []);
 
   const toggleDossier = (label) => setOuverts(prev => ({ ...prev, [label]: !prev[label] }));
 
@@ -119,7 +121,7 @@ export default function Dashboard() {
       {showForm && (
         <NouvellePrestation
           onClose={() => setShowForm(false)}
-          onSaved={(p) => { setPrestations(prev => [p, ...prev]); setShowForm(false); }}
+          onSaved={() => { setShowForm(false); setTimeout(chargerPrestations, 1500); }}
         />
       )}
     </div>
