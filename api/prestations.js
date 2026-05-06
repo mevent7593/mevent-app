@@ -74,8 +74,8 @@ export default async function handler(req, res) {
       "Lieu": { rich_text: [{ text: { content: lieu || "" } }] },
       "Prix de la presta ": { number: montant || 0 },
       "Acompte payé": { number: acompte || 0 },
-      "Téléphone": { phone_number: telephone || "" },
-      "E-mail": { email: email || "" },
+      "Téléphone": { phone_number: telephone && telephone.trim() ? telephone.trim() : null },
+      "E-mail": { email: email && email.trim() ? email.trim() : null },
       "Nom sur le filtre": { rich_text: [{ text: { content: filtre || "" } }] },
       "Musique choisi": { url: musique && musique.trim() ? musique.trim() : null },
       "Les Bosseurs": { multi_select: (bosseurs || []).map(b => ({ name: b })) },
@@ -83,6 +83,9 @@ export default async function handler(req, res) {
       "Statut de l'évènement": { select: { name: statut || "À venir" } },
     });
 
+    if (page.object === "error") {
+      return res.status(500).json({ error: page.message });
+    }
     return res.status(201).json({ id: page.id });
   }
 
