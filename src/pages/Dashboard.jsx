@@ -65,7 +65,7 @@ export default function Dashboard() {
           {[
             { label: "Total", count: prestations.length },
             { label: "À venir", count: prestations.filter(p => STATUTS_A_VENIR.includes(p.statut)).length },
-            { label: "En cours", count: prestations.filter(p => p.statut === "En cours").length },
+            { label: "En cours", count: prestations.filter(p => p.date === new Date().toISOString().slice(0, 10) && p.statut !== "Évènement terminé").length },
             { label: "Terminées", count: prestations.filter(p => p.statut === "Évènement terminé").length },
           ].map(s => (
             <div key={s.label} style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px" }}>
