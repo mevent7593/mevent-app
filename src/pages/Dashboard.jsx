@@ -35,26 +35,24 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
-      <div style={{ borderBottom: "1px solid #1a1a1a", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="/logo.png" alt="M'event" style={{ height: 125, objectFit: "contain", mixBlendMode: "lighten" }} />
-        </div>
-        <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ borderBottom: "1px solid #1a1a1a", padding: "16px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+        <img src="/logo.png" alt="M'event" style={{ height: 100, objectFit: "contain", mixBlendMode: "lighten" }} />
+        <div style={{ display: "flex", gap: 8, width: "100%", justifyContent: "center", flexWrap: "wrap" }}>
           <button
             onClick={() => navigate("/planning")}
-            style={{ background: "transparent", color: "#C9A84C", border: "1px solid #C9A84C", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+            style={{ background: "transparent", color: "#C9A84C", border: "1px solid #C9A84C", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
           >
             📅 Planning
           </button>
           <button
             onClick={() => navigate("/finance")}
-            style={{ background: "transparent", color: "#4CAF50", border: "1px solid #4CAF50", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+            style={{ background: "transparent", color: "#4CAF50", border: "1px solid #4CAF50", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
           >
             📊 Finances
           </button>
           <button
             onClick={() => setShowForm(true)}
-            style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+            style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
           >
             + Nouvelle prestation
           </button>
