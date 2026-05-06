@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
-const DB_ID = process.env.NOTION_DB_PRESTATIONS;
+const DB_ID = (process.env.NOTION_DB_PRESTATIONS || "").trim();
 
 async function queryDatabase(database_id, sorts) {
   const response = await fetch(`https://api.notion.com/v1/databases/${database_id}/query`, {
