@@ -64,24 +64,53 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const { nom, prenom, type, machine, date, creneau, lieu, montant, acompte, telephone, email, filtre, musique, bosseurs, extras, statut } = req.body;
 
-    const page = await createPage(DB_ID, {
+    // Récupérer les vrais noms des propriétés depuis Notion
+    const dbInfo = await fetch(`https://api.notion.com/v1/databases/${DB_ID}`, {
+      headers: {
+        "Authorization": `Bearer ${process.env.NOTION_TOKEN}`,
+        "Notion-Version": "2022-06-28",
+      },
+    }).then(r => r.json());
+
+    const props = dbInfo.properties || {};
+    const findProp = (keywords) => Object.keys(props).find(k => keywords.some(kw => k.toLowerCase().includes(kw.toLowerCase())));
+
+    const nomStatut = findProp(["Statut"]);
+    const nomType = findProp(["Type"]);
+    const nomMachine = findProp(["Machine"]);
+    const nomDate = findProp(["Date"]);
+    const nomCreneau = findProp(["Cr"]);
+    const nomPrix = findProp(["Prix"]);
+    const nomAcompte = findProp(["Acompte"]);
+    const nomPrenom = findProp(["Prénom"]);
+    const nomFiltre = findProp(["filtre"]);
+    const nomMusique = findProp(["Musique"]);
+    const nomBosseurs = findProp(["Bosseur"]);
+    const nomExtras = findProp(["Extra"]);
+    const nomTel = findProp(["léphone"]);
+    const nomEmail = findProp(["mail"]);
+    const nomLieu = findProp(["Lieu"]);
+
+    const properties = {
       "Nom": { title: [{ text: { content: nom } }] },
-      "Prénom": { rich_text: [{ text: { content: prenom || "" } }] },
-      "Type d'événement": { select: { name: type || "Photo Booth" } },
-      "Machine utilisée ": { multi_select: (machine || []).map(m => ({ name: m })) },
-      "Date réservé": { date: { start: date } },
-      "Créneau horaire": { rich_text: [{ text: { content: creneau || "" } }] },
-      "Lieu": { rich_text: [{ text: { content: lieu || "" } }] },
-      "Prix de la presta ": { number: montant || 0 },
-      "Acompte payé": { number: acompte || 0 },
-      "Téléphone": { phone_number: telephone && telephone.trim() ? telephone.trim() : null },
-      "E-mail": { email: email && email.trim() ? email.trim() : null },
-      "Nom sur le filtre": { rich_text: [{ text: { content: filtre || "" } }] },
-      "Musique choisi": { url: musique && musique.trim() ? musique.trim() : null },
-      "Les Bosseurs": { multi_select: (bosseurs || []).map(b => ({ name: b })) },
-      "Extras": { multi_select: (extras || []).map(e => ({ name: e })) },
-      "Statut de l'évènement": { select: { name: statut || "À venir" } },
-    });
+    };
+    if (nomPrenom) properties[nomPrenom] = { rich_text: [{ text: { content: prenom || "" } }] };
+    if (nomType) properties[nomType] = { select: { name: type || "Photo Booth" } };
+    if (nomMachine) properties[nomMachine] = { multi_select: (machine || []).map(m => ({ name: m })) };
+    if (nomDate && date) properties[nomDate] = { date: { start: date } };
+    if (nomCreneau) properties[nomCreneau] = { rich_text: [{ text: { content: creneau || "" } }] };
+    if (nomLieu) properties[nomLieu] = { rich_text: [{ text: { content: lieu || "" } }] };
+    if (nomPrix) properties[nomPrix] = { number: montant || 0 };
+    if (nomAcompte) properties[nomAcompte] = { number: acompte || 0 };
+    if (nomTel && telephone && telephone.trim()) properties[nomTel] = { phone_number: telephone.trim() };
+    if (nomEmail && email && email.trim()) properties[nomEmail] = { email: email.trim() };
+    if (nomFiltre) properties[nomFiltre] = { rich_text: [{ text: { content: filtre || "" } }] };
+    if (nomMusique && musique && musique.trim()) properties[nomMusique] = { url: musique.trim() };
+    if (nomBosseurs) properties[nomBosseurs] = { multi_select: (bosseurs || []).map(b => ({ name: b })) };
+    if (nomExtras) properties[nomExtras] = { multi_select: (extras || []).map(e => ({ name: e })) };
+    if (nomStatut) properties[nomStatut] = { select: { name: statut || "À venir" } };
+
+    const page = await createPage(DB_ID, properties);
 
     if (page.object === "error") {
       return res.status(500).json({ error: page.message });
