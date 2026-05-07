@@ -107,6 +107,7 @@ export default function Prestation() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {[
               { label: "Date", value: date },
+              { label: "Horaire", value: prestation.creneau || "—" },
               { label: "Lieu", value: prestation.lieu || "—" },
               { label: "Prix", value: prestation.montant ? `${prestation.montant}€` : "—" },
               { label: "Acompte payé", value: prestation.acompte ? `${prestation.acompte}€` : "—" },

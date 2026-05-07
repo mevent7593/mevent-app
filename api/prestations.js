@@ -56,6 +56,7 @@ export default async function handler(req, res) {
       telephone: page.properties["Téléphone"]?.phone_number ?? "",
       email: page.properties["E-mail"]?.email ?? "",
       filtre: page.properties["Nom sur le filtre"]?.rich_text?.[0]?.plain_text ?? "",
+      creneau: page.properties["Créneau horaire"]?.rich_text?.[0]?.plain_text ?? "",
     }));
 
     return res.status(200).json(prestations);
