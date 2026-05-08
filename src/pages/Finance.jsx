@@ -35,11 +35,8 @@ export default function Finance() {
   const caEncaisseToutesAnnees = prestations.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
   const caTotal = prestationsAnnee.reduce((acc, p) => acc + montantNum(p), 0);
   const caEncaisse = prestationsAnnee.filter(p => p.statut === "Évènement terminé").reduce((acc, p) => acc + montantNum(p), 0);
-  const chargesMenusuelles = charges.filter(c => c.label.startsWith("Touchpix") || c.label.startsWith("DSLR Booth"));
-  const chargesInvestissements = charges.filter(c => !c.label.startsWith("Touchpix") && !c.label.startsWith("DSLR Booth"));
-  const totalCharges = chargesInvestissements.reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
-  const totalMensuel = chargesMenusuelles.reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
-  const beneficeNet = caEncaisseToutesAnnees - totalCharges - totalMensuel;
+  const totalCharges = charges.reduce((acc, c) => acc + (Number(c.montant) || 0), 0);
+  const beneficeNet = caEncaisseToutesAnnees - totalCharges;
 
   // CA par mois
   const caParMois = MOIS_LABELS.map((label, i) => {
@@ -188,14 +185,14 @@ export default function Finance() {
             </div>
           </div>
 
-          {/* Charges & Investissements matériel */}
+          {/* Charges & Dépenses */}
           <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24, marginBottom: 24 }}>
-            <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Charges & Investissements</h3>
-            {chargesInvestissements.length === 0 ? (
+            <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Charges & Dépenses</h3>
+            {charges.length === 0 ? (
               <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>Aucune charge enregistrée</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {chargesInvestissements.map(c => (
+                {charges.map(c => (
                   <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#0a0a0a", borderRadius: 8 }}>
                     <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
                     <span style={{ color: "#f44336", fontWeight: 700 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
@@ -207,27 +204,6 @@ export default function Finance() {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Abonnements mensuels */}
-          <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24 }}>
-            <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Abonnements mensuels</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-              <div style={{ background: "#0a0a0a", borderRadius: 10, padding: "16px 20px" }}>
-                <div style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}>Touchpix</div>
-                <div style={{ color: "#f44336", fontSize: 22, fontWeight: 700, marginTop: 4 }}>120 € / mois</div>
-                <div style={{ color: "#555", fontSize: 12, marginTop: 2 }}>1 440 € / an</div>
-              </div>
-              <div style={{ background: "#0a0a0a", borderRadius: 10, padding: "16px 20px" }}>
-                <div style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}>DSLR Booth</div>
-                <div style={{ color: "#f44336", fontSize: 22, fontWeight: 700, marginTop: 4 }}>45 € / mois</div>
-                <div style={{ color: "#555", fontSize: 12, marginTop: 2 }}>540 € / an</div>
-              </div>
-            </div>
-            <div style={{ borderTop: "1px solid #2a2a2a", paddingTop: 12, display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "#555", fontSize: 13 }}>Total mensuel : <span style={{ color: "#f44336", fontWeight: 700 }}>165 € / mois</span></span>
-              <span style={{ color: "#555", fontSize: 13 }}>Total annuel : <span style={{ color: "#f44336", fontWeight: 700 }}>1 980 € / an</span></span>
-            </div>
           </div>
         </div>
       )}
