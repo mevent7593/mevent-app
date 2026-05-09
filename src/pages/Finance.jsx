@@ -191,18 +191,23 @@ export default function Finance() {
             {charges.length === 0 ? (
               <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>Aucune charge enregistrée</div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {charges.map(c => (
-                  <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#0a0a0a", borderRadius: 8 }}>
-                    <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
-                    <span style={{ color: "#f44336", fontWeight: 700 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
-                  </div>
-                ))}
-                <div style={{ borderTop: "1px solid #2a2a2a", marginTop: 8, paddingTop: 12, textAlign: "right" }}>
-                  <span style={{ color: "#555", fontSize: 13 }}>Total : </span>
-                  <span style={{ color: "#f44336", fontWeight: 700, fontSize: 16 }}>{totalCharges.toLocaleString("fr-FR")} €</span>
+              <>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 360, overflowY: "auto", paddingRight: 4 }}>
+                  {charges.map(c => (
+                    <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#0a0a0a", borderRadius: 8, flexShrink: 0 }}>
+                      <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
+                      <span style={{ color: "#f44336", fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
+                    </div>
+                  ))}
                 </div>
-              </div>
+                <div style={{ borderTop: "1px solid #2a2a2a", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#555", fontSize: 13 }}>{charges.length} dépense{charges.length > 1 ? "s" : ""}</span>
+                  <div>
+                    <span style={{ color: "#555", fontSize: 13 }}>Total : </span>
+                    <span style={{ color: "#f44336", fontWeight: 700, fontSize: 16 }}>{totalCharges.toLocaleString("fr-FR")} €</span>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
