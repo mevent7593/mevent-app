@@ -15,6 +15,7 @@ export default function Prestation() {
   const [confirming, setConfirming] = useState(false);
   const [confirme, setConfirme] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [terminating, setTerminating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -54,6 +55,18 @@ export default function Prestation() {
     setConfirme(true);
     setConfirming(false);
     setPrestation(p => ({ ...p, statut: "Confirmé" }));
+  };
+
+  const handleTerminer = async () => {
+    if (!window.confirm("Marquer cette prestation comme terminée ?")) return;
+    setTerminating(true);
+    await fetch("/api/statut", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prestationId: id, statut: "Évènement terminé" }),
+    });
+    setPrestation(p => ({ ...p, statut: "Évènement terminé" }));
+    setTerminating(false);
   };
 
   const handleSupprimer = async () => {
@@ -124,6 +137,18 @@ export default function Prestation() {
             ))}
           </div>
         </div>
+
+        {/* Terminer prestation */}
+        {prestation.statut !== "Devis" && prestation.statut !== "Évènement terminé" && (
+          <div style={{ background: "#111", border: "1px solid #4CAF50", borderRadius: 12, padding: 24, marginBottom: 24, textAlign: "center" }}>
+            <p style={{ color: "#aaa", margin: "0 0 16px", fontSize: 14 }}>
+              La prestation est terminée ? Marquez-la comme terminée pour la déplacer dans les évènements terminés.
+            </p>
+            <button onClick={handleTerminer} disabled={terminating} style={{ background: "#4CAF50", color: "#000", border: "none", borderRadius: 8, padding: "14px 32px", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
+              {terminating ? "..." : "✅ Marquer comme terminée"}
+            </button>
+          </div>
+        )}
 
         {/* Valider devis */}
         {prestation.statut === "Devis" && (
