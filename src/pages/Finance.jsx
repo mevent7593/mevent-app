@@ -16,6 +16,7 @@ export default function Finance() {
   const [charges, setCharges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [annee, setAnnee] = useState(new Date().getFullYear());
+  const [chargesOuvert, setChargesOuvert] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -185,29 +186,35 @@ export default function Finance() {
             </div>
           </div>
 
-          {/* Charges & Dépenses */}
-          <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 12, padding: 24, marginBottom: 24 }}>
-            <h3 style={{ margin: "0 0 20px", color: "#C9A84C", fontSize: 13, textTransform: "uppercase", letterSpacing: 1 }}>Charges & Dépenses</h3>
-            {charges.length === 0 ? (
-              <div style={{ color: "#555", textAlign: "center", padding: "24px 0", fontSize: 14 }}>Aucune charge enregistrée</div>
-            ) : (
-              <>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 360, overflowY: "auto", paddingRight: 4 }}>
-                  {charges.map(c => (
-                    <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#0a0a0a", borderRadius: 8, flexShrink: 0 }}>
-                      <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
-                      <span style={{ color: "#f44336", fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ borderTop: "1px solid #2a2a2a", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "#555", fontSize: 13 }}>{charges.length} dépense{charges.length > 1 ? "s" : ""}</span>
-                  <div>
-                    <span style={{ color: "#555", fontSize: 13 }}>Total : </span>
-                    <span style={{ color: "#f44336", fontWeight: 700, fontSize: 16 }}>{totalCharges.toLocaleString("fr-FR")} €</span>
+          {/* Charges & Dépenses (dossier accordéon) */}
+          <div style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 12, overflow: "hidden", marginBottom: 24 }}>
+            <div
+              onClick={() => setChargesOuvert(o => !o)}
+              style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", cursor: "pointer", borderLeft: "4px solid #f44336" }}
+            >
+              <span style={{ fontSize: 18 }}>{chargesOuvert ? "📂" : "📁"}</span>
+              <span style={{ fontWeight: 700, fontSize: 15, color: "#fff", flex: 1 }}>Charges & Dépenses</span>
+              <span style={{ color: "#f44336", fontWeight: 700, fontSize: 14 }}>-{totalCharges.toLocaleString("fr-FR")} €</span>
+              <span style={{ background: "#f44336", color: "#000", borderRadius: 20, padding: "2px 10px", fontSize: 12, fontWeight: 700 }}>
+                {charges.length}
+              </span>
+              <span style={{ color: "#555", fontSize: 18 }}>{chargesOuvert ? "▲" : "▼"}</span>
+            </div>
+            {chargesOuvert && (
+              <div style={{ borderTop: "1px solid #1a1a1a" }}>
+                {charges.length === 0 ? (
+                  <div style={{ color: "#555", textAlign: "center", padding: "20px", fontSize: 14 }}>Aucune charge enregistrée</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    {charges.map(c => (
+                      <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", background: "#0d0d0d" }}>
+                        <span style={{ color: "#fff", fontSize: 14 }}>{c.label}</span>
+                        <span style={{ color: "#f44336", fontWeight: 700, whiteSpace: "nowrap", marginLeft: 12 }}>-{Number(c.montant).toLocaleString("fr-FR")} €</span>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              </>
+                )}
+              </div>
             )}
           </div>
         </div>
