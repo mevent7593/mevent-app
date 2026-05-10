@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [ouverts, setOuverts] = useState({ "Devis": true, "À venir": true, "Acompte payé": false, "Évènement terminé": false });
   const [avisEnAttente, setAvisEnAttente] = useState(0);
+  const [showRelances, setShowRelances] = useState(false);
 
   const chargerPrestations = () => {
     fetch("/api/prestations")
@@ -67,6 +68,12 @@ export default function Dashboard() {
                 {avisEnAttente}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setShowRelances(true)}
+            style={{ background: "transparent", color: "#9C27B0", border: "1px solid #9C27B0", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
+          >
+            📤 Relances
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -140,6 +147,116 @@ export default function Dashboard() {
           onSaved={() => { setShowForm(false); setTimeout(chargerPrestations, 1500); }}
         />
       )}
+
+      {showRelances && <RelancesAvis onClose={() => setShowRelances(false)} />}
+    </div>
+  );
+}
+
+function RelancesAvis({ onClose }) {
+  const [eligibles, setEligibles] = useState([]);
+  const [selection, setSelection] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [envoi, setEnvoi] = useState(false);
+  const [resultat, setResultat] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/relances-avis")
+      .then(r => r.json())
+      .then(data => {
+        const arr = Array.isArray(data) ? data : [];
+        setEligibles(arr);
+        setSelection(arr.reduce((acc, e) => ({ ...acc, [e.id]: true }), {}));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const toggle = (id) => setSelection(s => ({ ...s, [id]: !s[id] }));
+  const toggleAll = (val) => setSelection(eligibles.reduce((acc, e) => ({ ...acc, [e.id]: val }), {}));
+  const idsSelectionnes = eligibles.filter(e => selection[e.id]).map(e => e.id);
+
+  const envoyer = async () => {
+    if (idsSelectionnes.length === 0) return;
+    if (!window.confirm(`Envoyer la relance à ${idsSelectionnes.length} client${idsSelectionnes.length > 1 ? "s" : ""} ?`)) return;
+    setEnvoi(true);
+    const res = await fetch("/api/relances-avis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: idsSelectionnes }),
+    });
+    const data = await res.json();
+    setResultat(data);
+    setEnvoi(false);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+      <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 16, padding: 24, width: "100%", maxWidth: 580, maxHeight: "90vh", overflowY: "auto", color: "#fff", fontFamily: "Inter, sans-serif" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 20 }}>📤 Relances avis</h2>
+          <button onClick={onClose} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Fermer</button>
+        </div>
+
+        {resultat ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <h3 style={{ margin: "0 0 8px", color: "#4CAF50" }}>{resultat.envoyes} email{resultat.envoyes > 1 ? "s" : ""} envoyé{resultat.envoyes > 1 ? "s" : ""}</h3>
+            {resultat.erreurs && resultat.erreurs.length > 0 && (
+              <div style={{ color: "#f44336", fontSize: 13, marginTop: 12 }}>
+                {resultat.erreurs.length} erreur{resultat.erreurs.length > 1 ? "s" : ""}
+              </div>
+            )}
+            <button onClick={onClose} style={{ background: "#C9A84C", color: "#000", border: "none", borderRadius: 8, padding: "12px 24px", fontWeight: 700, cursor: "pointer", fontSize: 14, marginTop: 24 }}>OK</button>
+          </div>
+        ) : loading ? (
+          <div style={{ color: "#888", textAlign: "center", padding: "40px 0" }}>Chargement...</div>
+        ) : eligibles.length === 0 ? (
+          <div style={{ color: "#888", textAlign: "center", padding: "40px 0" }}>
+            Aucun client éligible pour une relance.
+            <div style={{ color: "#555", fontSize: 12, marginTop: 8 }}>(prestations terminées avant le 8 mai 2026, avec email, sans relance déjà envoyée)</div>
+          </div>
+        ) : (
+          <>
+            <p style={{ color: "#aaa", fontSize: 13, margin: "0 0 12px" }}>
+              {eligibles.length} client{eligibles.length > 1 ? "s" : ""} éligible{eligibles.length > 1 ? "s" : ""} pour une relance avis + code FIDELITE20.
+            </p>
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <button onClick={() => toggleAll(true)} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}>Tout cocher</button>
+              <button onClick={() => toggleAll(false)} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 6, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}>Tout décocher</button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 360, overflowY: "auto", marginBottom: 16 }}>
+              {eligibles.map(e => {
+                const date = e.date ? new Date(e.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+                const checked = !!selection[e.id];
+                return (
+                  <label key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#0a0a0a", borderRadius: 8, cursor: "pointer", border: `1px solid ${checked ? "#9C27B0" : "transparent"}` }}>
+                    <input type="checkbox" checked={checked} onChange={() => toggle(e.id)} style={{ accentColor: "#9C27B0" }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>
+                        {e.prenom ? `${e.prenom} ` : ""}{e.nom}
+                      </div>
+                      <div style={{ color: "#666", fontSize: 12, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {e.email} · {date}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={envoyer}
+              disabled={envoi || idsSelectionnes.length === 0}
+              style={{ width: "100%", background: "#9C27B0", color: "#fff", border: "none", borderRadius: 10, padding: "14px", fontWeight: 700, cursor: idsSelectionnes.length === 0 ? "not-allowed" : "pointer", fontSize: 15, opacity: idsSelectionnes.length === 0 ? 0.5 : 1 }}
+            >
+              {envoi ? "Envoi en cours..." : `Envoyer à ${idsSelectionnes.length} client${idsSelectionnes.length > 1 ? "s" : ""}`}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
