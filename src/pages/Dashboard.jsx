@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [ouverts, setOuverts] = useState({ "Devis": true, "À venir": true, "Acompte payé": false, "Évènement terminé": false });
+  const [avisEnAttente, setAvisEnAttente] = useState(0);
 
   const chargerPrestations = () => {
     fetch("/api/prestations")
@@ -27,7 +28,13 @@ export default function Dashboard() {
       .catch(() => setLoading(false));
   };
 
-  useEffect(() => { chargerPrestations(); }, []);
+  useEffect(() => {
+    chargerPrestations();
+    fetch("/api/avis?nonValides=1")
+      .then(r => r.json())
+      .then(d => setAvisEnAttente(Array.isArray(d) ? d.length : 0))
+      .catch(() => {});
+  }, []);
 
   const toggleDossier = (label) => setOuverts(prev => ({ ...prev, [label]: !prev[label] }));
 
@@ -49,6 +56,17 @@ export default function Dashboard() {
             style={{ background: "transparent", color: "#4CAF50", border: "1px solid #4CAF50", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13 }}
           >
             📊 Finances
+          </button>
+          <button
+            onClick={() => navigate("/avis-validation")}
+            style={{ background: "transparent", color: "#FF9800", border: "1px solid #FF9800", borderRadius: 8, padding: "10px 16px", fontWeight: 700, cursor: "pointer", fontSize: 13, position: "relative" }}
+          >
+            💬 Avis
+            {avisEnAttente > 0 && (
+              <span style={{ position: "absolute", top: -8, right: -8, background: "#f44336", color: "#fff", borderRadius: 20, padding: "2px 7px", fontSize: 11, fontWeight: 700, minWidth: 20 }}>
+                {avisEnAttente}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setShowForm(true)}

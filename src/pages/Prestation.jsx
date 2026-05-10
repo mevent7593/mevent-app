@@ -18,6 +18,7 @@ export default function Prestation() {
   const [terminating, setTerminating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -69,6 +70,17 @@ export default function Prestation() {
     setTerminating(false);
   };
 
+  const handleCopierLienAvis = async () => {
+    const lien = `${window.location.origin}/laisser-avis?prestation=${id}`;
+    try {
+      await navigator.clipboard.writeText(lien);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    } catch {
+      window.prompt("Copiez ce lien :", lien);
+    }
+  };
+
   const handleSupprimer = async () => {
     if (!window.confirm("Supprimer cette prestation ? Cette action est irréversible.")) return;
     setDeleting(true);
@@ -107,6 +119,9 @@ export default function Prestation() {
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <StatutBadge statut={prestation.statut} />
+            <button onClick={handleCopierLienAvis} style={{ background: "transparent", border: "1px solid #FF9800", color: "#FF9800", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}>
+              {linkCopied ? "✓ Copié !" : "📎 Lien avis"}
+            </button>
             <button onClick={() => setShowEdit(true)} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}>✏️ Modifier</button>
             <button onClick={handleSupprimer} disabled={deleting} style={{ background: "transparent", border: "1px solid #f44336", color: "#f44336", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 13 }}>
               {deleting ? "..." : "🗑️ Supprimer"}
