@@ -71,7 +71,7 @@ export default function Prestation() {
   };
 
   const handleCopierLienAvis = async () => {
-    const lien = `${window.location.origin}/laisser-avis?prestation=${id}`;
+    const lien = `https://mevent-app.vercel.app/laisser-avis?prestation=${id}`;
     try {
       await navigator.clipboard.writeText(lien);
       setLinkCopied(true);
