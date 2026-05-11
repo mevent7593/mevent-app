@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   const TOKEN = process.env.NOTION_TOKEN;
   const DB_ID = (process.env.NOTION_DB_PRESTATIONS || "").trim();
-  const WEBHOOK = process.env.MAKE_RELANCE_AVIS_WEBHOOK;
+  const WEBHOOK = process.env.RELANCE_HOOK || process.env.MAKE_RELANCE_AVIS_WEBHOOK;
 
   const dbInfo = await fetch(`https://api.notion.com/v1/databases/${DB_ID}`, {
     headers: { "Authorization": `Bearer ${TOKEN}`, "Notion-Version": "2022-06-28" },
