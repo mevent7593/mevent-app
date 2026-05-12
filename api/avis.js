@@ -83,18 +83,22 @@ export default async function handler(req, res) {
 
     const NOUVEL_AVIS_HOOK = process.env.NOUVEL_AVIS_HOOK || process.env.NOUVELLE_AVIS_HOOK;
     if (NOUVEL_AVIS_HOOK) {
-      fetch(NOUVEL_AVIS_HOOK, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nom,
-          note,
-          commentaire,
-          type: type || "—",
-          lieu: lieu || "—",
-          lien_validation: "https://mevent-app.vercel.app/avis-validation",
-        }),
-      }).catch(() => {});
+      try {
+        await fetch(NOUVEL_AVIS_HOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nom,
+            note,
+            commentaire,
+            type: type || "—",
+            lieu: lieu || "—",
+            lien_validation: "https://mevent-app.vercel.app/avis-validation",
+          }),
+        });
+      } catch (e) {
+        // Erreur webhook silencieuse - l'avis est quand même créé
+      }
     }
 
     return res.status(201).json({ id: data.id });
