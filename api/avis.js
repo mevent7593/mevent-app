@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     const data = await response.json();
     if (data.object === "error") return res.status(500).json({ error: data.message });
 
-    const NOUVEL_AVIS_HOOK = process.env.NOUVEL_AVIS_HOOK;
+    const NOUVEL_AVIS_HOOK = process.env.NOUVEL_AVIS_HOOK || process.env.NOUVELLE_AVIS_HOOK;
     if (NOUVEL_AVIS_HOOK) {
       fetch(NOUVEL_AVIS_HOOK, {
         method: "POST",
