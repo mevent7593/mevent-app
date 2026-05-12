@@ -7,6 +7,22 @@ export default async function handler(req, res) {
 
   const { from, subject, body, date } = req.body;
 
+  const sujet = (subject || "").toLowerCase().trim();
+  const expediteur = (from || "").toLowerCase();
+
+  const MOTS_CLES = ["devis", "reservation", "réservation", "demande de location", "demande de devis", "demande de réservation"];
+  const sujetValide = MOTS_CLES.some(mot => sujet.includes(mot));
+  if (!sujetValide) return res.status(200).json({ ignore: "Sujet sans mot-clé" });
+
+  if (/^(re|tr|fwd|fw)\s*:/i.test((subject || "").trim())) {
+    return res.status(200).json({ ignore: "Réponse ou transfert" });
+  }
+
+  const DOMAINES_EXCLUS = ["notion.so", "notion.com", "formspree", "noreply", "no-reply", "mailchimp", "sendgrid", "hubspot", "linkedin", "facebook", "instagram", "twitter", "youtube", "google.com", "stripe.com", "vercel.com", "make.com"];
+  if (DOMAINES_EXCLUS.some(d => expediteur.includes(d))) {
+    return res.status(200).json({ ignore: "Expéditeur exclu" });
+  }
+
   const nomMatch = from?.match(/^([^<]+)</);
   const nom = nomMatch ? nomMatch[1].trim() : (from || "Inconnu");
   const email = from?.match(/<(.+)>/)?.[1] || from || "";
