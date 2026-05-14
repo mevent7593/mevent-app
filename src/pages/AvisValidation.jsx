@@ -7,6 +7,7 @@ export default function AvisValidation() {
   const [avisValides, setAvisValides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState({});
+  const [apercu, setApercu] = useState(null);
 
   const charger = () => {
     setLoading(true);
@@ -111,7 +112,13 @@ export default function AvisValidation() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {avisValides.map(a => (
-                  <div key={a.id} style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 10, padding: "12px 16px" }}>
+                  <div
+                    key={a.id}
+                    onClick={() => setApercu(a)}
+                    style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 10, padding: "12px 16px", cursor: "pointer", transition: "border-color 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "#C9A84C"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "#1a1a1a"}
+                  >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{a.nom}</div>
@@ -122,12 +129,15 @@ export default function AvisValidation() {
                       <div style={{ color: "#C9A84C", fontSize: 14, letterSpacing: 2 }}>{renderEtoiles(a.note)}</div>
                     </div>
                     <p style={{ color: "#aaa", fontSize: 13, margin: "6px 0 0", lineHeight: 1.5 }}>« {a.commentaire} »</p>
-                    <button
-                      onClick={() => rejeter(a.id)}
-                      style={{ background: "transparent", color: "#666", border: "none", padding: "6px 0 0", fontSize: 11, cursor: "pointer", textDecoration: "underline" }}
-                    >
-                      Supprimer
-                    </button>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+                      <span style={{ color: "#C9A84C", fontSize: 11, fontStyle: "italic" }}>📸 Cliquer pour partager</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); rejeter(a.id); }}
+                        style={{ background: "transparent", color: "#666", border: "none", padding: 0, fontSize: 11, cursor: "pointer", textDecoration: "underline" }}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -135,6 +145,67 @@ export default function AvisValidation() {
           </>
         )}
       </div>
+
+      {apercu && <ApercuAvis avis={apercu} onClose={() => setApercu(null)} renderEtoiles={renderEtoiles} />}
+    </div>
+  );
+}
+
+function ApercuAvis({ avis, onClose, renderEtoiles }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 16, overflowY: "auto" }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%)",
+          border: "2px solid #C9A84C",
+          borderRadius: 24,
+          padding: "40px 32px",
+          width: "100%",
+          maxWidth: 480,
+          textAlign: "center",
+          position: "relative",
+          boxShadow: "0 20px 60px rgba(201, 168, 76, 0.25)",
+        }}
+      >
+        <div style={{ fontSize: 48, color: "#C9A84C", letterSpacing: 6, marginBottom: 16 }}>
+          {renderEtoiles(avis.note)}
+        </div>
+
+        {avis.type && (
+          <div style={{ display: "inline-block", background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.3)", color: "#C9A84C", fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", padding: "4px 12px", borderRadius: 20, marginBottom: 24 }}>
+            {avis.type}
+          </div>
+        )}
+
+        <p style={{ color: "#f4f4f4", fontSize: 18, lineHeight: 1.7, fontStyle: "italic", margin: "0 0 32px", fontFamily: "Georgia, serif" }}>
+          « {avis.commentaire} »
+        </p>
+
+        <div style={{ borderTop: "1px solid rgba(201,168,76,0.2)", paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg, #C9A84C, #a07830)", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontSize: 20, fontWeight: 700, fontFamily: "Georgia, serif" }}>
+            {(avis.nom || "?").trim().charAt(0).toUpperCase()}
+          </div>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>{avis.nom}</div>
+            {avis.lieu && <div style={{ color: "#888", fontSize: 12, marginTop: 2 }}>{avis.lieu}</div>}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", color: "#C9A84C", fontSize: 11, letterSpacing: 2, textTransform: "uppercase", fontWeight: 600 }}>
+          M'event
+        </div>
+      </div>
+
+      <button
+        onClick={onClose}
+        style={{ position: "fixed", top: 16, right: 16, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid #2a2a2a", borderRadius: "50%", width: 40, height: 40, fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        ✕
+      </button>
     </div>
   );
 }
